@@ -1,5 +1,7 @@
 # Three-dimensional Geospatial Interlinking with JedAI-spatial
 
+[![DOI](https://zenodo.org/badge/488920144.svg)](https://zenodo.org/badge/latestdoi/488920144)
+
 ## Datasets
 
 All real-world datasets that are used in the experimental analysis of [JedAI-spatial](https://arxiv.org/abs/2205.01905) are publicly available [here](https://zenodo.org/record/6384164#.YnOkk1BByUk).
