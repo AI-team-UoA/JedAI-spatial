@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.1.6.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>anonymous</groupId>
+	<artifactId>GeoLinker-WebApp</artifactId>
+	<version>1.0.1-SNAPSHOT</version>
+	<name>GeoLinker-WebApp</name>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<project.name>GeoLinker</project.name>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-rest</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web-services</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.session</groupId>
+			<artifactId>spring-session-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.javatuples</groupId>
+		    <artifactId>javatuples</artifactId>
+		    <version>1.2</version>
+		</dependency>	
+		
+		<dependency>
+		    <groupId>com.h2database</groupId>
+		    <artifactId>h2</artifactId>
+		    <scope>runtime</scope>
+		</dependency>
+			
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>	
+		
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20190722</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.scify/jedai-core -->
+		 <dependency>
+		    <groupId>org.scify</groupId>
+		    <artifactId>jedai-core</artifactId>
+		    <version>3.01-SNAPSHOT </version>
+			 <exclusions>
+				 <exclusion>
+					 <groupId>com.opencsv</groupId>
+					 <artifactId>opencsv</artifactId>
+				 </exclusion>
+			 </exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.livy</groupId>
+			<artifactId>livy-client-http</artifactId>
+			<version>0.7.0-incubating</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_2.11</artifactId>
+			<version>2.4.4</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.locationtech.jts/jts-core -->
+		<dependency>
+			<groupId>org.locationtech.jts</groupId>
+			<artifactId>jts-core</artifactId>
+			<version>1.18.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>dit</groupId>
+			<artifactId>geospatialinterlinking</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<scope>system</scope>
+			<systemPath>/home/Documents/Geospatial-Interlinking/geospatialinterlinking/target/geospatialinterlinking-1.0-SNAPSHOT-jar-with-dependencies.jar</systemPath>
+		</dependency>
+
+	</dependencies>
+	
+	
+	<repositories>
+	    <repository>
+	      <id>jedai-repo</id>
+	      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+	    </repository>
+  	</repositories>
+  
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.8.0</version>
+				<configuration>
+					<installDirectory>target</installDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install node and npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>v9.11.2</nodeVersion>
+							<npmVersion>6.9.0</npmVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>webpack build</id>
+						<goals>
+							<goal>webpack</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+      
+		</plugins>
+	</build>
+
+</project>

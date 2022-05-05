@@ -1,0 +1,513 @@
+package dit.anonymous.webapp.execution.er;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import dit.anonymous.webapp.datatypes.EntityProfileNode;
+import dit.anonymous.webapp.datatypes.MethodModel;
+import dit.anonymous.webapp.datatypes.SimilarityMethodModel;
+import dit.anonymous.webapp.execution.er.workflows.BlockingWF;
+import dit.anonymous.webapp.execution.er.workflows.ProgressiveWF;
+import dit.anonymous.webapp.utilities.SSE_Manager;
+import org.javatuples.Pair;
+import org.javatuples.Triplet;
+import org.scify.jedai.blockbuilding.IBlockBuilding;
+import org.scify.jedai.blockprocessing.IBlockProcessing;
+import org.scify.jedai.datamodel.EntityProfile;
+import org.scify.jedai.datamodel.EquivalenceCluster;
+import org.scify.jedai.entityclustering.IEntityClustering;
+import org.scify.jedai.entitymatching.IEntityMatching;
+import org.scify.jedai.schemaclustering.ISchemaClustering;
+import org.scify.jedai.utilities.BlocksPerformance;
+import org.scify.jedai.utilities.ClustersPerformance;
+import org.scify.jedai.utilities.datastructures.AbstractDuplicatePropagation;
+import org.scify.jedai.utilities.enumerations.BlockBuildingMethod;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+
+import gnu.trove.list.TIntList;
+import dit.anonymous.webapp.utilities.events.EventPublisher;
+import dit.anonymous.webapp.execution.er.workflows.JoinWF;
+import dit.anonymous.webapp.utilities.configurations.DynamicMethodConfiguration;
+import dit.anonymous.webapp.utilities.configurations.Options;
+import dit.anonymous.webapp.utilities.configurations.MethodConfigurations;
+
+public class WorkflowManager {
+	
+	public final static int NO_OF_TRIALS = 100;
+
+	public static  String er_mode = null;
+	public static  String wf_mode = null;
+
+	public static List<EntityProfile> profilesD1 = null;
+	public static List<EntityProfile> profilesD2 = null;
+	public static AbstractDuplicatePropagation ground_truth = null;
+
+	public static List<IBlockProcessing> block_cleaning = null;
+	
+	public static List<EquivalenceCluster> entityClusters = null;
+
+	
+	private static EventPublisher eventPublisher;
+	public static int workflowConfigurationsID = -1;
+	
+
+	@Bean
+	EventPublisher publisherBean () {
+        return new EventPublisher();
+    }
+	
+	@Bean
+    SSE_Manager SSE_ManagerBean () {
+		return new SSE_Manager();
+	}
+	
+	public static void clean() {
+		
+		workflowConfigurationsID = -1;
+		entityClusters = null;
+		if (wf_mode == null) return;
+		switch(wf_mode){
+			case Options.WORKFLOW_BLOCKING_BASED:
+				BlockingWF.clean();
+				break;
+			case Options.WORKFLOW_JOIN_BASED:
+				JoinWF.clean();
+				break;
+			case Options.WORKFLOW_PROGRESSIVE:
+				ProgressiveWF.clean();
+				break;
+		}
+	}
+
+	/**
+	 * check if execution was interrupted
+	 */
+	public static boolean interrupt(AtomicBoolean interrupted){
+		//the process was stopped by the user
+		if (interrupted.get()) {
+			eventPublisher.publish("", "execution_step");
+			return true;
+		}
+		else return false;
+	}
+	
+	public static void setSchemaClustering(MethodModel sc) {
+		if (!sc.getLabel().equals(Options.NO_SCHEMA_CLUSTERING)) {
+			
+			ISchemaClustering schemaClustering;
+			if(!sc.getConfiguration_type().equals(Options.MANUAL_CONFIG))
+				schemaClustering = MethodConfigurations.getSchemaClusteringMethodByName(sc.getLabel());
+			else
+				schemaClustering = DynamicMethodConfiguration.configureSchemaClusteringMethod(
+					sc.getLabel(),
+					sc.getParameters());
+	                    
+			switch(wf_mode){
+				case Options.WORKFLOW_BLOCKING_BASED:
+					BlockingWF.setSchema_clustering(schemaClustering);
+					break;
+				case Options.WORKFLOW_PROGRESSIVE:
+					ProgressiveWF.setSchema_clustering(schemaClustering);
+					break;
+			}
+		}	
+	}
+
+	
+
+
+	public static void setComparisonCleaning(MethodModel cc) {
+		
+		if (!cc.getLabel().equals(Options.NO_CLEANING)) {
+
+			IBlockProcessing comparisonCleaning = null;
+
+			if(!cc.getConfiguration_type().equals(Options.MANUAL_CONFIG))
+				comparisonCleaning = MethodConfigurations.getMethodByName(cc.getLabel());
+			else 
+				comparisonCleaning = DynamicMethodConfiguration.configureComparisonCleaningMethod(
+        			cc.getLabel(),
+					cc.getParameters() 
+				);
+					
+			switch(wf_mode){
+				case Options.WORKFLOW_BLOCKING_BASED:
+					BlockingWF.setComparison_cleaning(comparisonCleaning);
+					break;
+				case Options.WORKFLOW_PROGRESSIVE:
+					ProgressiveWF.setComparison_cleaning(comparisonCleaning);
+					break;
+			}
+		}
+	}
+	
+	public static boolean setEntityMatching(MethodModel em) {
+		IEntityMatching entityMatching = null;
+
+		if(!em.getConfiguration_type().equals(Options.MANUAL_CONFIG))
+			entityMatching = DynamicMethodConfiguration
+                    .configureEntityMatchingMethod(em.getLabel(), null);
+         else 
+		 	entityMatching = DynamicMethodConfiguration
+                    .configureEntityMatchingMethod(em.getLabel(), em.getParameters());
+		
+		switch(wf_mode){
+			case Options.WORKFLOW_BLOCKING_BASED:
+				BlockingWF.setEntity_matching(entityMatching);
+				break;
+			case Options.WORKFLOW_PROGRESSIVE:
+				ProgressiveWF.setEntity_matching(entityMatching);
+				break;
+		}
+		return true;
+	}
+	
+	public static void setEntityClustering(MethodModel ec) {
+		IEntityClustering entityClustering = null;
+
+		if(!ec.getConfiguration_type().equals(Options.MANUAL_CONFIG))
+			entityClustering = MethodConfigurations.getEntityClusteringMethod(ec.getLabel());
+         else 
+		 	entityClustering = DynamicMethodConfiguration.configureEntityClusteringMethod(ec.getLabel(), ec.getParameters());
+		
+		switch(wf_mode){
+			case Options.WORKFLOW_BLOCKING_BASED:
+				BlockingWF.setEntity_clustering(entityClustering);
+				break;
+			case Options.WORKFLOW_JOIN_BASED:
+				JoinWF.setEntityClustering(entityClustering);
+				break;
+			case Options.WORKFLOW_PROGRESSIVE:
+				ProgressiveWF.setEntity_clustering(entityClustering);
+				break;
+		}
+	}
+
+	public static void setSimilarityJoinMethod(SimilarityMethodModel similarity_join) {
+		JoinWF.setSimilarityJoinMethod(similarity_join);
+	}
+
+
+	public static void setPrioritizationMethod(MethodModel pm){
+		ProgressiveWF.setPrioritizationModel(pm);
+	}
+	
+
+	public static void addBlockBuildingMethod(MethodModel method) {
+		
+    	BlockBuildingMethod blockBuilding_method = MethodConfigurations.blockBuildingMethods.get(method.getLabel());
+       
+        IBlockBuilding blockBuildingMethod;
+        if (!method.getConfiguration_type().equals(Options.MANUAL_CONFIG))
+            
+            blockBuildingMethod = BlockBuildingMethod.getDefaultConfiguration(blockBuilding_method);
+         else 
+        	 blockBuildingMethod = DynamicMethodConfiguration.configureBlockBuildingMethod(blockBuilding_method, method.getParameters());
+		
+		switch(wf_mode){
+			case Options.WORKFLOW_BLOCKING_BASED:
+				BlockingWF.addBlockBuilding(blockBuildingMethod);
+				break;
+			case Options.WORKFLOW_PROGRESSIVE:
+				ProgressiveWF.addBlockBuilding(blockBuildingMethod);
+				break;
+		}
+	}
+	
+	public static void addBlockCleaningMethod(MethodModel method) {
+		
+		IBlockProcessing blockCleaningMethod;
+        if (!method.getConfiguration_type().equals(Options.MANUAL_CONFIG))
+			blockCleaningMethod = MethodConfigurations.getMethodByName(method.getLabel());
+          else 
+		  	blockCleaningMethod = DynamicMethodConfiguration.configureBlockCleaningMethod(
+             		method.getLabel(), method.getParameters());
+
+		switch(wf_mode){
+			case Options.WORKFLOW_BLOCKING_BASED:
+				BlockingWF.addBlockCleaning(blockCleaningMethod);
+				break;
+			case Options.WORKFLOW_PROGRESSIVE:
+				ProgressiveWF.addBlockCleaning(blockCleaningMethod);
+				break;
+		}
+	}    
+    
+    
+	
+	
+	public static Pair<ClustersPerformance, List<Triplet<String, BlocksPerformance, Double>>>
+	runWorkflow(boolean final_run, AtomicBoolean interrupted){
+		switch(wf_mode){
+			case Options.WORKFLOW_BLOCKING_BASED:
+				return BlockingWF.run(final_run, interrupted);
+			case Options.WORKFLOW_JOIN_BASED:
+				return JoinWF.run(final_run, interrupted);
+			case Options.WORKFLOW_PROGRESSIVE:
+				return ProgressiveWF.run(final_run, interrupted);
+			default:
+				return null;
+		}
+	}
+
+		
+	/**
+     * Run a step by step workflow, using random or grid search based on the given parameter.
+     *
+     * @param random      If true, will use random search. Otherwise, grid.
+     * @return ClustersPerformance of the workflow result
+     */
+	public static Pair<ClustersPerformance, List<Triplet<String, BlocksPerformance, Double>>> 
+	runStepByStepWorkflow(Map<String, Object> methodsConfig, boolean random, AtomicBoolean interrupted) {
+		switch(wf_mode){
+			case Options.WORKFLOW_BLOCKING_BASED:
+				return BlockingWF.runStepByStepWorkflow(random, methodsConfig, interrupted);
+			default:
+				return null;
+		}
+	}
+	
+	
+	
+	/**
+     * send the error message to the front-end
+     *
+     */
+	public static void setErrorMessage(String error_msg) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(WorkflowManager.class);
+		if (eventPublisher == null) {
+			eventPublisher = context.getBean(EventPublisher.class);
+		}
+		eventPublisher.publish(error_msg, "exception");
+		context.close();
+	}
+    
+    
+	/**
+     * Construct a list containing the detected duplicates
+     * 
+     * @return the list of the detected duplicates
+     */
+	public static List<List<EntityProfileNode>> getDetectedDuplicates(){
+		
+		List<List<EntityProfileNode>> duplicates = new ArrayList<>();
+		
+		for (EquivalenceCluster ec : entityClusters){
+			if (er_mode.equals(Options.DIRTY_ER)) {
+				
+				if (!ec.getEntityIdsD1().isEmpty()) { 
+					TIntList duplicate_list = ec.getEntityIdsD1();
+					if(duplicate_list.size() > 1 ) {
+						List<EntityProfileNode> entity_duplicates = new ArrayList<>();
+						for (int i = 0; i < duplicate_list.size(); i++){
+							int id = duplicate_list.get(i);
+							entity_duplicates.add(new EntityProfileNode(WorkflowManager.profilesD1.get(id), id));
+						}
+
+						duplicates.add(entity_duplicates);		
+					}
+				}
+				
+			}
+			else {
+				if (!ec.getEntityIdsD1().isEmpty() && !ec.getEntityIdsD2().isEmpty()) {
+					TIntList ids_1 = ec.getEntityIdsD1();
+					TIntList ids_2 = ec.getEntityIdsD2();
+					List<EntityProfileNode> entity_duplicates = new ArrayList<>();
+					for (int i = 0; i < ids_1.size(); i++){
+						int id = ids_1.get(i);
+						entity_duplicates.add(new EntityProfileNode(WorkflowManager.profilesD1.get(id), id));
+					}
+					for (int i = 0; i < ids_2.size(); i++){
+						int id = ids_2.get(i);
+						entity_duplicates.add(new EntityProfileNode(WorkflowManager.profilesD2.get(id), id));
+					}
+					
+					if (entity_duplicates.size() > 1 ) duplicates.add(entity_duplicates);					
+				}
+			}
+		}
+		return duplicates;
+	}
+    
+	
+	/**
+     * When bestIteration is null, set the next random configuration for each method in the workflow that should be
+     * automatically configured. If it is set, set these methods to that configuration.
+     *
+     * @param bestIteration Best iteration (optional)
+     */
+    public static void iterateHolisticRandom(Map<String, Object> methodsConfig, Integer bestIteration) {
+		switch(wf_mode){
+			case Options.WORKFLOW_BLOCKING_BASED:
+				//Check if schema clustering parameters should be set automatically
+				if(BlockingWF.schema_clustering != null)
+				if (bestIteration == null) 
+					BlockingWF.schema_clustering.setNextRandomConfiguration();
+				else 
+					BlockingWF.schema_clustering.setNumberedRandomConfiguration(bestIteration);
+		
+				// Check if any block building method parameters should be set automatically
+				if (BlockingWF.getBlock_building() != null && !BlockingWF.getBlock_building().isEmpty()) {
+					// Index of the methods in the Block Building List
+					int enabledMethodIndex = 0;
+		
+					// Check each block building method configuration
+					List<MethodModel> blockBuilding_methods = (List<MethodModel>) methodsConfig.get(Options.BLOCK_BUILDING);
+					for (MethodModel method : blockBuilding_methods){
+						// Method is enabled, check if we should configure automatically
+						if (method.getConfiguration_type().equals(Options.AUTOMATIC_CONFIG)) {
+							// Get instance of the method and set next random configuration
+							if (bestIteration == null) 
+								BlockingWF.block_building.get(enabledMethodIndex).setNextRandomConfiguration();
+							else 
+								BlockingWF.block_building.get(enabledMethodIndex).setNumberedRandomConfiguration(bestIteration);
+							
+							// Increment index
+							enabledMethodIndex++;
+						}
+					}            
+				}
+				
+				// Check if any block cleaning method parameters should be set automatically
+				if (BlockingWF.getBlock_cleaning() != null && !BlockingWF.getBlock_cleaning().isEmpty()) {
+					// Index of the methods in the Block Cleaning Methods List
+					int enabledMethodIndex = 0;
+		
+					// Check each block cleaning method configuration
+					List<MethodModel> blockCleaning_methods = (List<MethodModel>) methodsConfig.get(Options.BLOCK_CLEANING);
+					for ( MethodModel method :blockCleaning_methods) {
+						
+						// Method is enabled, check if we should configure automatically
+						if (method.getConfiguration_type().equals(Options.AUTOMATIC_CONFIG)) {
+							// Get instance of the method and set next random configuration
+							if (bestIteration == null) 
+								BlockingWF.block_cleaning.get(enabledMethodIndex).setNextRandomConfiguration();
+							else
+								BlockingWF.block_cleaning.get(enabledMethodIndex).setNumberedRandomConfiguration(bestIteration);
+							
+							// Increment index
+							enabledMethodIndex++;
+						}
+					}
+				}
+		
+				// Check if comparison cleaning parameters should be set automatically
+				if(BlockingWF.comparison_cleaning != null)
+					if (((MethodModel) methodsConfig.get(Options.COMPARISON_CLEANING)).getConfiguration_type().equals(Options.AUTOMATIC_CONFIG))
+						if (bestIteration == null) 
+							BlockingWF.comparison_cleaning.setNextRandomConfiguration();
+						else 
+							BlockingWF.comparison_cleaning.setNumberedRandomConfiguration(bestIteration);
+					
+		
+				// Check if entity matching parameters should be set automatically
+				if (((MethodModel) methodsConfig.get(Options.ENTITY_MATCHING)).getConfiguration_type().equals(Options.AUTOMATIC_CONFIG)) {
+					if (bestIteration == null) 
+						BlockingWF.entity_matching.setNextRandomConfiguration();
+					else 
+						BlockingWF.entity_matching.setNumberedRandomConfiguration(bestIteration);
+				}
+		
+				
+				// Check if entity clustering parameters should be set automatically
+				if (((MethodModel) methodsConfig.get(Options.ENTITY_CLUSTERING)).getConfiguration_type().equals(Options.AUTOMATIC_CONFIG)) {
+					if (bestIteration == null) 
+						BlockingWF.entity_clustering.setNextRandomConfiguration();
+					else 
+						BlockingWF.entity_clustering.setNumberedRandomConfiguration(bestIteration);
+				}
+		}
+    	
+	}
+	
+	public static void exportToCSV(String outputFile) throws FileNotFoundException{
+        final PrintWriter pw = new PrintWriter(new File(outputFile));
+        StringBuilder sb = new StringBuilder();
+        if (er_mode == Options.CLEAN_CLEAN_ER) {
+            for (EquivalenceCluster cluster : entityClusters) {
+				if (cluster.getEntityIdsD1().size() != 1
+                        || cluster.getEntityIdsD2().size() != 1) {
+                    continue;
+                }
+                final int entityId1 = cluster.getEntityIdsD1().get(0);
+                final EntityProfile profile1 = profilesD1.get(entityId1);
+
+                final int entityId2 = cluster.getEntityIdsD2().get(0);
+                final EntityProfile profile2 = profilesD2.get(entityId2);
+
+                sb.append(profile1.getEntityUrl()).append(",");
+                sb.append(profile2.getEntityUrl()).append("\n");
+
+			}
+		}
+		else{
+			for (EquivalenceCluster cluster : entityClusters) {
+                final int[] duplicatesArray = cluster.getEntityIdsD1().toArray();
+				for (int i = 0; i < duplicatesArray.length; i++) {
+					for (int j = i + 1; j < duplicatesArray.length; j++) {
+
+						final EntityProfile profile1 = profilesD1.get(duplicatesArray[i]);
+						final EntityProfile profile2 = profilesD1.get(duplicatesArray[j]);
+
+						sb.append(profile1.getEntityUrl()).append(",");
+						sb.append(profile2.getEntityUrl()).append("\n");
+					}
+				}
+			}
+		}
+		pw.write(sb.toString());
+        pw.close();
+	}
+
+
+	public static String getEr_mode() {
+		return er_mode;
+	}
+
+	public static void setEr_mode(String er_mode) {
+		WorkflowManager.er_mode = er_mode;
+	}
+
+	public static List<EntityProfile> getProfilesD1() {
+		return profilesD1;
+	}
+
+	public static void setProfilesD1(List<EntityProfile> profilesD1) {
+		WorkflowManager.profilesD1 = profilesD1;
+	}
+
+	public static List<EntityProfile> getProfilesD2() {
+		return profilesD2;
+	}
+
+	public static void setProfilesD2(List<EntityProfile> profilesD2) {
+		WorkflowManager.profilesD2 = profilesD2;
+	}
+
+	public static AbstractDuplicatePropagation getGround_truth() {
+		return ground_truth;
+	}
+
+	public static void setGround_truth(AbstractDuplicatePropagation ground_truth) {
+		WorkflowManager.ground_truth = ground_truth;
+	}
+
+	public static EquivalenceCluster[] getEntityClusters() {
+		EquivalenceCluster[] ec = new EquivalenceCluster[entityClusters.size()];
+		ec = entityClusters.toArray(ec);
+		return ec;
+	}
+
+	public static void setEntityClusters(EquivalenceCluster[] entityClusters) {
+		WorkflowManager.entityClusters = Arrays.asList(entityClusters);
+	}
+	
+}
