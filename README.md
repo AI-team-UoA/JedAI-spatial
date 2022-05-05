@@ -4,6 +4,10 @@
 
 All real-world datasets that are used in the experimental analysis of [JedAI-spatial](https://arxiv.org/abs/2205.01905) are publicly available [here](https://zenodo.org/record/6384164#.YnOkk1BByUk).
 
+### Supported Geometry Types
+- 1D Linestrings/Polylines
+- 2D Polygons
+
 ## Run Serial Experiments
 
 See instructions [here](serial/README.md).
@@ -24,9 +28,6 @@ The Docker file for JedAI-spatial Web application is available [here](https://dr
 
 	sudo docker run -e JAVAOPTIONS=‘-Xmx4g’ -p 8080:8080 geolinker
 	
-## Supported Geometry Types
-- 1D Linestrings/Polylines
-- 2D Polygons
 
 ## GUI
 
