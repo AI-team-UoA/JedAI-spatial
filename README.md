@@ -47,7 +47,7 @@ To compile and run JedAI-spatial serial:
 		
 2. Build JedAI-spatial serial using maven
 
-		mvn clean pacakge
+		mvn clean package
 		
 3. Execute the program through the CLI class
 
@@ -84,6 +84,6 @@ In this (Subject, Predicate, Object) triples represent:
 ## Comments
 
 1. The ids from source and target files are different even when the source and target files are the same. Source files always start with ids from 0, while target files always start with ids from 1.
-2. TSV files are not working properly. When operation on TSV files the serial version of JedAI-Spatial may get stuck and stop functioning. The CSV counterparts of the files seem to work fine.
-3. The JedAI-Spatial GUI, is not fully functional. One major problem is that results cannot be exported.
+2. When operation on TSV files the serial version of JedAI-Spatial may get stuck and stop functioning. Please use the CSV counterparts of the input files instead.
+3. The JedAI-Spatial GUI will be extended so that it can export the results.
 
