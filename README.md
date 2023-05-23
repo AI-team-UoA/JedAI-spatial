@@ -4,11 +4,14 @@
 
 **JedAI-spatial** is an open-source system for computing topological relations according to the DE9IM model between datasets with geometric entities.
 It consists of three modules:
+
 1. The serial one, which runs on a single CPU with Java 8 or later
 2. The parallel one, based on Scala 2.11.12 and Apache Spark 2.4.4
 3. The GUI
-We describe each module in more detail in the following. Please 
+
+We describe each module in more detail in the following. 
 For more details, please refer to the technical report [Three-dimensional Geospatial Interlinking with JedAI-spatial)](https://arxiv.org/pdf/2205.01905.pdf).
+
 # 1. Serial Processing
 
 This component comprises the state-of-the-art methods for Geospatial Interlinking in the literature.
