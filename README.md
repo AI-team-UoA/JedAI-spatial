@@ -10,6 +10,7 @@ It consists of three modules:
 3. The GUI
 
 We describe each module in more detail in the following. 
+
 For more details, please refer to the technical report [Three-dimensional Geospatial Interlinking with JedAI-spatial)](https://arxiv.org/pdf/2205.01905.pdf).
 
 # 1. Serial Processing
