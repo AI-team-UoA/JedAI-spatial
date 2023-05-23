@@ -1,10 +1,14 @@
+# Three-dimensional Geospatial Interlinking with JedAI-spatial
+
+[![DOI](https://zenodo.org/badge/488920144.svg)](https://zenodo.org/badge/latestdoi/488920144)
+
 **JedAI-spatial** is an open-source system for computing topological relations according to the DE9IM model between datasets with geometric entities.
 It consists of three modules:
 1. The serial one, which runs on a single CPU with Java 8 or later
 2. The parallel one, based on Scala 2.11.12 and Apache Spark 2.4.4
 3. The GUI
 We describe each module in more detail in the following. Please 
-
+For more details, please refer to the technical report [Three-dimensional Geospatial Interlinking with JedAI-spatial)](https://arxiv.org/pdf/2205.01905.pdf).
 # 1. Serial Processing
 
 This component comprises the state-of-the-art methods for Geospatial Interlinking in the literature.
@@ -109,7 +113,6 @@ The third and final phase, **Local Join Stage**, performs the spatial join on th
 	- Filtering Step: Filter all the intersecting MBRs between target and source candidates by comparing each target from `Iterable[TargetGeometries]` with  each source geometry from `Iterable[SourceGeometries]`.
 	- Verification Step: Verify the topological relations of each pair of source-target candidates.
 
-
 #### 1. Spatial Spark [1], [2]
 
 Spatial Spark has two implementations, a Partitioned Join (process afore-mentioned) and a Broadcast Join. The Broadcast Join leverages the Apache Spark's broadcast variables, however it is not useful for big datasets due to KryoSerializer's 2GB maximum buffer value. 
@@ -163,7 +166,6 @@ configurations:
   sedonaLocalIndexType: "RTREE"
   partitions: "400"
 ```
-
 
 #### 3. Location Spark [6], [7], [8]
 
@@ -225,9 +227,12 @@ configurations:
 8. https://github.com/purduedb/LocationSpark
 9. https://github.com/harsha2010/magellan
 
-# Three-dimensional Geospatial Interlinking with JedAI-spatial
+## 3. GUI
 
-[![DOI](https://zenodo.org/badge/488920144.svg)](https://zenodo.org/badge/latestdoi/488920144)
+<p  align="center">
+<img  src="https://github.com/gpapadis/JedAI-spatial/blob/main/documentation/JS-gui.gif">
+</p>
+
 
 ## Datasets
 
@@ -236,14 +241,6 @@ All real-world datasets that are used in the experimental analysis of [JedAI-spa
 ### Supported Geometry Types
 - 1D Linestrings/Polylines
 - 2D Polygons
-
-## Run Serial Experiments
-
-See instructions [here](serial/README.md).
-
-## Run Parallel Experiments
-
-See instructions [here](parallel/README.md).
 
 ## Run JedAI-spatial Docker
 
@@ -257,13 +254,6 @@ The Docker file for JedAI-spatial Web application is available [here](https://dr
 
 	sudo docker run -e JAVAOPTIONS=‘-Xmx4g’ -p 8080:8080 geolinker
 	
-
-## GUI
-
-<p  align="center">
-<img  src="https://github.com/gpapadis/JedAI-spatial/blob/main/documentation/JS-gui.gif">
-</p>
-
 ## Run JedAI-spatial serial
 
 To compile and run JedAI-spatial serial:
