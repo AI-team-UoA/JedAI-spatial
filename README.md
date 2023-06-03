@@ -248,15 +248,16 @@ All real-world datasets that are used in the experimental analysis of [JedAI-spa
 
 ## Run JedAI-spatial Docker
 
-The Docker file for JedAI-spatial Web application is available [here](https://drive.google.com/file/d/11ZiiFgAh2kvcBURwTj6ozsLlAbdz3Qal/view?usp=sharing).
+The Docker file for JedAI-spatial Web application is available [here](Dockerfile).
 
-### Load Docker from TAR
+### Build Docker container
 
-	sudo docker load < geolinker-docker.tar 
+	git clone https://github.com/AI-team-UoA/JedAI-spatial.git
+	sudo docker build -t jedaispatial JedAI-spatial 
 
 ### Execute Docker
 
-	sudo docker run -e JAVAOPTIONS=‘-Xmx4g’ -p 8080:8080 geolinker
+	sudo docker run -e JAVAOPTIONS=‘-Xmx4g’ -p 8080:8080 jedaispatial
 	
 ## Run JedAI-spatial serial
 
