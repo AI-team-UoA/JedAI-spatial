@@ -259,13 +259,13 @@ There are two ways to create the docker image.
 ### 2. Build Docker container from Github
 
 	git clone https://github.com/AI-team-UoA/JedAI-spatial.git
-	sudo docker build -t jedaispatial JedAI-spatial 
+	sudo docker build -t gpapadis84/jedaispatial JedAI-spatial 
 
 ### Execute Docker
 
 In both cases, the Docker container can be run with the following command:
 
-	sudo docker run -e JAVAOPTIONS=‘-Xmx4g’ -p 8080:8080 jedaispatial
+	sudo docker run -e JAVAOPTIONS=‘-Xmx4g’ -p 8080:8080 gpapadis84/jedaispatial
 	
 ## Run JedAI-spatial serial
 
