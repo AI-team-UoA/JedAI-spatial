@@ -248,14 +248,22 @@ All real-world datasets that are used in the experimental analysis of [JedAI-spa
 
 ## Run JedAI-spatial Docker
 
-The Docker file for JedAI-spatial Web application is available [here](Dockerfile).
+The Docker file for JedAI-spatial Web application is available [here](Dockerfile), whereas the public repository in Docker Hub is [here](https://hub.docker.com/repository/docker/gpapadis84/jedaispatial).
 
-### Build Docker container
+There are two ways to create the docker image.
+
+### 1. Pull from Docker Hub
+	
+	docker pull gpapadis84/jedaispatial
+
+### 2. Build Docker container from Github
 
 	git clone https://github.com/AI-team-UoA/JedAI-spatial.git
 	sudo docker build -t jedaispatial JedAI-spatial 
 
 ### Execute Docker
+
+In both cases, the Docker container can be run with the following command:
 
 	sudo docker run -e JAVAOPTIONS=‘-Xmx4g’ -p 8080:8080 jedaispatial
 	
