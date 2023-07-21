@@ -138,7 +138,7 @@ public abstract class AbstractProgressiveAlgorithm implements IDocumentation {
         System.out.println("Indexing Time\t:\t" + indexingTime);
         System.out.println("Initialization Time\t:\t" + initializationTime);
         System.out.println("Verification Time\t:\t" + verificationTime);
-        relations.print();
+        System.out.println(relations.print());
     }
     
     protected void setApproximateNoOfBlocks() {
