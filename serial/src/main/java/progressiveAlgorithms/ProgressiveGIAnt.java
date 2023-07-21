@@ -90,7 +90,6 @@ public class ProgressiveGIAnt extends AbstractProgressiveAlgorithm {
     protected void scheduling() {
         int counter = 0;
         while (targetReader.hasNext()) {
-            counter++;
             GeometryProfile profile = targetReader.next();
             if (profile == null) {
                 continue;
