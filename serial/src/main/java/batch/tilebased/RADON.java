@@ -23,7 +23,7 @@ public class RADON extends AbstractTileBasedAlgorithm {
     }
 
     public RADON(int qPairs, AbstractReader sourceReader, AbstractReader targetReader, String  exportFile) {
-        super(qPairs, sourceReader, targetReader);
+        super(qPairs, sourceReader, targetReader, exportPath);
         targetData = targetReader.getGeometryProfiles();
     }
     
