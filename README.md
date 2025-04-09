@@ -11,7 +11,7 @@ It consists of three modules:
 
 We describe each module in more detail in the following. 
 
-For more details, please refer to the technical report [Three-dimensional Geospatial Interlinking with JedAI-spatial](https://www.sciencedirect.com/science/article/pii/S1570826824000039?via%3Dihub), which is also available as a [technical report](https://arxiv.org/pdf/2205.01905.pdf).
+For more details, please refer to the paper [Three-dimensional Geospatial Interlinking with JedAI-spatial](https://www.sciencedirect.com/science/article/pii/S1570826824000039?via%3Dihub), which is also available as a [technical report](https://arxiv.org/pdf/2205.01905.pdf).
 
 # 1. Serial Processing
 
