@@ -283,7 +283,7 @@ To compile and run JedAI-spatial serial:
 
 		java -cp target/geospatialinterlinking-1.0-SNAPSHOT-jar-with-dependencies.jar workflowManager.CommandLineInterface
 		
-4. Through the CLI select input and target files, execution method and wether to export results or not
+4. Through the CLI select input and target files, execution method and whether to export results or not
 5. If the choice to export the results was selected, the output file will be a NTRIPLES file of the following format:
 ```
 <0> <http://www.opengis.net/ont/geosparql#sfContains> <1> .
